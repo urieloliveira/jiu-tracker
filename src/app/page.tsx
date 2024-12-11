@@ -15,7 +15,7 @@ export default async function Index() {
           <div className="flex gap-5 items-center font-semibold">
             <Link href={"/"}>Jiu Tracker</Link>
           </div>
-          <HeaderAuth />
+          <HeaderAuth user={user} />
         </div>
       </nav>
       <div className="flex-1 flex flex-col gap-2 items-center justify-center max-w-5xl p-5">

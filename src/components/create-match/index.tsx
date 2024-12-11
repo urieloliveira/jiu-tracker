@@ -103,7 +103,7 @@ export default function CreateMatch() {
 
       console.log("Tudo inserido com sucesso");
     } catch (err) {
-      console.error(err.message);
+      console.error(err);
 
       // Rollback manual: remover os registros inseridos
       if (insertedFighterIds.length > 0) {
