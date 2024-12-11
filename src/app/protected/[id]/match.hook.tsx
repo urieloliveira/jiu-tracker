@@ -4,6 +4,8 @@ import { createClient } from "@/utils/supabase/client";
 import { Match } from "@/components/create-match/schema";
 import { useRouter } from "next/navigation";
 import { useTimers } from "@/components/timer/hook";
+import { Database } from "@/utils/supabase/types";
+import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
 
 export const useMatch = ({ id }: { id: string }) => {
   const router = useRouter();
@@ -48,22 +50,28 @@ export const useMatch = ({ id }: { id: string }) => {
         age_key: data.age_key,
       });
       setFighters(
-        data.match_fighters.map((mf: any) => ({
-          id: mf.fighter_id,
-          name: mf.fighters.name,
-          team: mf.fighters.team,
-          winnerBy: mf.winner_by,
-          scores: {
-            advantages: mf.advantages,
-            penalties: mf.penalties,
-            points: mf.points,
-          },
-        }))
+        data.match_fighters.map(
+          (
+            mf: Database["public"]["Tables"]["match_fighters"]["Row"] & {
+              fighters: Database["public"]["Tables"]["fighters"]["Row"];
+            }
+          ) => ({
+            id: mf.fighter_id,
+            name: mf.fighters.name,
+            team: mf.fighters.team,
+            winnerBy: mf.winner_by,
+            scores: {
+              advantages: mf.advantages,
+              penalties: mf.penalties,
+              points: mf.points,
+            },
+          })
+        )
       );
     };
 
     fetchData();
-  }, []);
+  }, [id, reset, supabase]);
 
   const updateScore = async (
     fighterId: string,
@@ -224,17 +232,27 @@ export const useMatch = ({ id }: { id: string }) => {
     router.push("/protected");
   };
 
-  const onUpdated = (payload: any) => {
+  const onUpdated = (
+    payload: RealtimePostgresUpdatePayload<{
+      id: string;
+      match_id: string;
+      fighter_id: string;
+      advantages: number;
+      points: number;
+      penalties: number;
+      winner_by: string | null;
+    }>
+  ) => {
     if (payload.new.match_id !== id) return;
     const matchFighterUpdated = payload.new;
     const updatedFighterIndex = fighters.findIndex(
       (fighter) => fighter.id === matchFighterUpdated.fighter_id
     );
-    const updatedFighter = {
+    const updatedFighter: Fighter = {
       id: matchFighterUpdated.fighter_id,
       name: fighters[updatedFighterIndex].name,
       team: fighters[updatedFighterIndex].team,
-      winnerBy: matchFighterUpdated.winner_by,
+      winnerBy: matchFighterUpdated.winner_by || undefined,
       scores: {
         advantages: matchFighterUpdated.advantages,
         penalties: matchFighterUpdated.penalties,

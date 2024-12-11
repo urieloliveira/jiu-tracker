@@ -15,6 +15,7 @@ import { createClient } from "@/utils/supabase/client";
 import { getLabel } from "@/components/create-match/data";
 import { useEffect, useState } from "react";
 import { Fighter, Match, MatchFighter } from "@/components/create-match/schema";
+import { Database } from "@/utils/supabase/types";
 
 export type MatchData = Match & {
   fighters: Array<Fighter & MatchFighter>;
@@ -47,12 +48,18 @@ export default function ProtectedPage() {
       const formattedData: MatchData[] =
         data?.map((match) => ({
           ...match,
-          fighters: match.match_fighters.map((mf: any) => ({
-            ...mf.fighters,
-            advantages: mf.advantages,
-            points: mf.points,
-            penalties: mf.penalties,
-          })),
+          fighters: match.match_fighters.map(
+            (
+              mf: Database["public"]["Tables"]["match_fighters"]["Row"] & {
+                fighters: Database["public"]["Tables"]["fighters"]["Row"];
+              }
+            ) => ({
+              ...mf.fighters,
+              advantages: mf.advantages,
+              points: mf.points,
+              penalties: mf.penalties,
+            })
+          ),
         })) || [];
 
       setMatchesData(formattedData);
