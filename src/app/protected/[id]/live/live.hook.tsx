@@ -4,11 +4,12 @@ import { createClient } from "@/utils/supabase/client";
 import { useTimers } from "@/components/timer/hook";
 import { Database } from "@/utils/supabase/types";
 import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
-import { Match } from "../match/match.hook";
 
 export const useMatch = ({ id }: { id: string }) => {
   const [fighters, setFighters] = useState<Fighter[]>([]);
-  const [match, setMatch] = useState<Match | null>(null);
+  const [match, setMatch] = useState<
+    Database["public"]["Tables"]["matches"]["Row"] | null
+  >(null);
   const { reset } = useTimers();
   const supabase = createClient();
 
@@ -20,6 +21,7 @@ export const useMatch = ({ id }: { id: string }) => {
           `
           *,
           match_fighters (
+            position,
             advantages,
             points,
             penalties,
@@ -44,6 +46,7 @@ export const useMatch = ({ id }: { id: string }) => {
         category_key: data.category_key,
         gender_key: data.gender_key,
         age_key: data.age_key,
+        time: data.time,
       });
       setFighters(
         data.match_fighters.map(
@@ -53,6 +56,7 @@ export const useMatch = ({ id }: { id: string }) => {
             }
           ) => ({
             id: mf.fighter_id,
+            position: mf.position,
             name: mf.fighters.name,
             team: mf.fighters.team,
             winnerBy: mf.winner_by,
@@ -70,15 +74,9 @@ export const useMatch = ({ id }: { id: string }) => {
   }, []);
 
   const onUpdated = (
-    payload: RealtimePostgresUpdatePayload<{
-      id: string;
-      match_id: string;
-      fighter_id: string;
-      advantages: number;
-      points: number;
-      penalties: number;
-      winner_by: string | null;
-    }>
+    payload: RealtimePostgresUpdatePayload<
+      Database["public"]["Tables"]["match_fighters"]["Row"]
+    >
   ) => {
     if (payload.new.match_id !== id) return;
     const matchFighterUpdated = payload.new;
@@ -87,13 +85,14 @@ export const useMatch = ({ id }: { id: string }) => {
     );
     const updatedFighter: Fighter = {
       id: matchFighterUpdated.fighter_id,
+      position: matchFighterUpdated.position,
       name: fighters[updatedFighterIndex].name,
       team: fighters[updatedFighterIndex].team,
       winnerBy: matchFighterUpdated.winner_by || undefined,
       scores: {
-        advantages: matchFighterUpdated.advantages,
-        penalties: matchFighterUpdated.penalties,
-        points: matchFighterUpdated.points,
+        advantages: matchFighterUpdated.advantages ?? 0,
+        penalties: matchFighterUpdated.penalties ?? 0,
+        points: matchFighterUpdated.points ?? 0,
       },
     };
     setFighters((prev) => {

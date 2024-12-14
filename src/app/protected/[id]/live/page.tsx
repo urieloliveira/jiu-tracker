@@ -13,18 +13,20 @@ export default function Live() {
 
   return (
     <div className="flex flex-col h-screen gap-2 bg-zinc-950">
-      <FighterCard
-        mode="view"
-        fighter={fighters?.[0]}
-        scoreBgColor="bg-yellow-600"
-        scoreColor="text-green-800"
-      />
-      <FighterCard
-        mode="view"
-        fighter={fighters[1]}
-        scoreBgColor="bg-zinc-950"
-        scoreColor="text-white"
-      />
+      {fighters
+        .sort((a, b) => a.position - b.position)
+        .map((fighter) => (
+          <FighterCard
+            mode="view"
+            fighter={fighter}
+            scoreBgColor={
+              fighter.position === 1 ? "bg-yellow-600" : "bg-zinc-950"
+            }
+            scoreColor={
+              fighter.position === 1 ? "text-green-800" : "text-white"
+            }
+          />
+        ))}
       <div className="flex-1 flex gap-2 p-8 items-center justify-between">
         {match && (
           <div className="flex flex-col gap-2">

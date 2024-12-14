@@ -2,6 +2,7 @@ import { EndedActionsProps, ScoreActionsProps } from "../score-actions/types";
 
 export interface Fighter {
   id: string;
+  position: number;
   name: string;
   team: string;
   scores: {

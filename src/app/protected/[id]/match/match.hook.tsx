@@ -4,22 +4,16 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTimers } from "@/components/timer/hook";
 import { Database } from "@/utils/supabase/types";
-
-export type Match = {
-  id: string;
-  status: "PENDING" | "STARTED" | "FINISHED";
-  belt_key: string;
-  category_key: string;
-  gender_key: string;
-  age_key: string;
-};
+import { revalidatePath } from "next/cache";
 
 export const useMatch = ({ id }: { id: string }) => {
   const router = useRouter();
   const [fighters, setFighters] = useState<Fighter[]>([]);
   const [ended, setEnded] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [match, setMatch] = useState<Match | null>(null);
+  const [match, setMatch] = useState<
+    Database["public"]["Tables"]["matches"]["Row"] | null
+  >(null);
   const { timers, start, stop, reset } = useTimers();
   const supabase = createClient();
 
@@ -31,6 +25,7 @@ export const useMatch = ({ id }: { id: string }) => {
           `
           *,
           match_fighters (
+            position,
             advantages,
             points,
             penalties,
@@ -50,11 +45,12 @@ export const useMatch = ({ id }: { id: string }) => {
       reset(id, 300 - data.time);
       setMatch({
         id: data.id,
-        status: data.status,
+        status: "IN_PROGRESS",
         belt_key: data.belt_key,
         category_key: data.category_key,
         gender_key: data.gender_key,
         age_key: data.age_key,
+        time: data.time,
       });
       setFighters(
         data.match_fighters.map(
@@ -64,6 +60,7 @@ export const useMatch = ({ id }: { id: string }) => {
             }
           ) => ({
             id: mf.fighter_id,
+            position: mf.position,
             name: mf.fighters.name,
             team: mf.fighters.team,
             winnerBy: mf.winner_by,
@@ -75,6 +72,11 @@ export const useMatch = ({ id }: { id: string }) => {
           })
         )
       );
+
+      await supabase
+        .from("matches")
+        .update({ status: "IN_PROGRESS" })
+        .eq("id", id);
     };
 
     fetchData();
@@ -170,8 +172,29 @@ export const useMatch = ({ id }: { id: string }) => {
     }
   };
 
-  const switchFighters = () => {
-    setFighters((prev) => [prev[1], prev[0]]);
+  const switchFighters = async () => {
+    try {
+      await supabase
+        .from("match_fighters")
+        .update({ position: fighters[1]?.position })
+        .eq("fighter_id", fighters[0].id)
+        .eq("match_id", id);
+
+      await supabase
+        .from("match_fighters")
+        .update({ position: fighters[0]?.position })
+        .eq("fighter_id", fighters[1].id)
+        .eq("match_id", id);
+
+      setFighters((prev) =>
+        prev.map((fighter) => ({
+          ...fighter,
+          position: fighter.position === 1 ? 2 : 1,
+        }))
+      );
+    } catch (err) {
+      console.error("Erro ao executar switchFighters:", err);
+    }
   };
 
   const setWinner = (id: string, value: string) => {
@@ -236,6 +259,14 @@ export const useMatch = ({ id }: { id: string }) => {
       return;
     }
 
+    revalidatePath("/protected");
+    router.push("/protected");
+  };
+
+  const leaveMatch = async () => {
+    await supabase.from("matches").update({ status: "PENDING" }).eq("id", id);
+
+    revalidatePath("/protected");
     router.push("/protected");
   };
 
@@ -253,6 +284,7 @@ export const useMatch = ({ id }: { id: string }) => {
     setWinner,
     finished,
     finishMatch,
+    leaveMatch,
     onComplete,
   };
 };

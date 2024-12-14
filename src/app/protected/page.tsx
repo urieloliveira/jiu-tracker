@@ -7,17 +7,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MoreVertical } from "lucide-react";
 import { signOutAction } from "../actions";
 import { createClient } from "@/utils/supabase/server";
-import { getLabel } from "@/components/create-match/data";
+import {
+  getBeltColor,
+  getLabel,
+  getStatusColor,
+} from "@/components/create-match/data";
 import { Database } from "@/utils/supabase/types";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import clsx from "clsx";
+import { DeleteMatch } from "@/components/delete-match";
 
 export type MatchData = Database["public"]["Tables"]["matches"]["Row"] & {
   fighters: Array<
     Database["public"]["Tables"]["fighters"]["Row"] & {
+      position: number;
       advantages: number;
       points: number;
       penalties: number;
@@ -28,16 +36,19 @@ export type MatchData = Database["public"]["Tables"]["matches"]["Row"] & {
 export default async function ProtectedPage() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from("matches").select(`
+  const { data, error } = await supabase.from("matches").select(
+    `
       *,
       match_fighters (
+        position,
         advantages,
         points,
         penalties,
         fighter_id,
         fighters: fighter_id (*)
       )
-    `);
+    `
+  );
 
   if (error) {
     console.error("Erro ao buscar dados:", error);
@@ -72,7 +83,9 @@ export default async function ProtectedPage() {
             <DialogTrigger asChild>
               <Button variant="default">Nova Luta</Button>
             </DialogTrigger>
-            <CreateMatch />
+            <DialogContent>
+              <CreateMatch />
+            </DialogContent>
           </Dialog>
           <Button type="submit" variant="outline" onClick={signOutAction}>
             Sign out
@@ -85,10 +98,20 @@ export default async function ProtectedPage() {
             {matches.map((match) => (
               <div
                 key={match.id}
-                className="relative flex items-center rounded-md border py-4 pl-6 pr-4 bg-zinc-900"
+                className="relative flex items-center rounded-md py-4 pl-6 pr-4 bg-neutral-900"
               >
-                <div className="absolute left-0 rounded-l-md w-3 h-full bg-blue-800 mr-4" />
+                <div
+                  className={clsx(
+                    "absolute left-0 rounded-l-md w-3 h-full mr-4",
+                    getBeltColor(match.belt_key)
+                  )}
+                />
                 <div className="flex-1 space-y-3">
+                  <Badge
+                    className={clsx("text-white", getStatusColor(match.status))}
+                  >
+                    {getLabel(match.status, "status")}
+                  </Badge>
                   <p className="text-sm text-muted-foreground">
                     {getLabel(match.gender_key, "genders")} •{" "}
                     {getLabel(match.age_key, "ages")} •{" "}
@@ -97,24 +120,26 @@ export default async function ProtectedPage() {
                   </p>
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col">
-                      <p className="text-lg font-semibold leading-none">
+                      <p className="text-2xl font-semibold leading-none">
                         {match.fighters?.[0]?.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-lg text-muted-foreground">
                         {match.fighters?.[0]?.team}
                       </p>
                     </div>
                     <span className="text-2xl text-muted-foreground">vs</span>
                     <div className="flex flex-col">
-                      <p className="text-lg font-semibold leading-none">
+                      <p className="text-2xl font-semibold leading-none">
                         {match.fighters?.[1]?.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-lg text-muted-foreground">
                         {match.fighters?.[1]?.team}
                       </p>
                     </div>
                   </div>
                 </div>
+
+                {/* Menu Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="secondary" size="icon">
@@ -122,16 +147,38 @@ export default async function ProtectedPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <Link href={`/protected/${match.id}/match`}>
-                      <DropdownMenuItem>
-                        <span>Iniciar</span>
+                    {match.status === "PENDING" && (
+                      <Link
+                        href={`/protected/${match.id}/match`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <DropdownMenuItem asChild>
+                          <span>Iniciar</span>
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
+                    <Link
+                      href={`/protected/${match.id}/live`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <DropdownMenuItem asChild>
+                        <span>
+                          {match.status !== "IN_PROGRESS"
+                            ? "Visualizar"
+                            : "Ao vivo"}
+                        </span>
                       </DropdownMenuItem>
                     </Link>
-                    <Link href={`/protected/${match.id}/live`}>
-                      <DropdownMenuItem>
-                        <span>Live</span>
-                      </DropdownMenuItem>
-                    </Link>
+                    {match.status === "PENDING" && (
+                      <DeleteMatch
+                        id={match.id}
+                        fightersIds={match.fighters.map((f) => f.id)}
+                      >
+                        <span>Excluir</span>
+                      </DeleteMatch>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

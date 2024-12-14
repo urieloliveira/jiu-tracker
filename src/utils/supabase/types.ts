@@ -94,6 +94,7 @@ export type Database = {
           match_id: string
           penalties: number | null
           points: number | null
+          position: number
           winner_by: string | null
         }
         Insert: {
@@ -102,6 +103,7 @@ export type Database = {
           match_id: string
           penalties?: number | null
           points?: number | null
+          position?: number
           winner_by?: string | null
         }
         Update: {
@@ -110,6 +112,7 @@ export type Database = {
           match_id?: string
           penalties?: number | null
           points?: number | null
+          position?: number
           winner_by?: string | null
         }
         Relationships: [

@@ -20,6 +20,8 @@ import { ages, belts, categories, genders } from "./data";
 import { nanoid } from "nanoid";
 import { createClient } from "@/utils/supabase/server";
 import { SubmitButton } from "../submit-button";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export default function CreateMatch() {
   async function onSubmit(formData: FormData) {
@@ -107,6 +109,7 @@ export default function CreateMatch() {
         throw new Error("Erro ao inserir os lutadores na luta");
 
       console.log("Tudo inserido com sucesso");
+      revalidatePath(`/protected`);
     } catch (err) {
       console.error(err);
 
@@ -123,102 +126,102 @@ export default function CreateMatch() {
   }
 
   return (
-    <DialogContent>
-      <form
-        method="post"
-        action={onSubmit as unknown as string}
-        className="space-y-8"
-      >
-        <DialogHeader>
-          <DialogTitle>Nova Luta</DialogTitle>
-          <DialogDescription>
-            Preencha os campos abaixo para criar uma nova luta.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between gap-4">
-            <Select name="belt_key">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione a faixa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Faixa</SelectLabel>
-                  {belts.map((belt) => (
-                    <SelectItem key={belt.key} value={belt.key}>
-                      {belt.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Select name="category_key">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione a categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Categoria</SelectLabel>
-                  {categories.map((category) => (
-                    <SelectItem key={category.key} value={category.key}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-between gap-4">
-            <Select name="gender_key">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o gênero" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Gênero</SelectLabel>
-                  {genders.map((gender) => (
-                    <SelectItem key={gender.key} value={gender.key}>
-                      {gender.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Select name="age_key">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione a idade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Idade</SelectLabel>
-                  {ages.map((age) => (
-                    <SelectItem key={age.key} value={age.key}>
-                      {age.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-4">
-            <Label htmlFor="fighter1" className="font-semibold">
-              Atleta 1
-            </Label>
-            <Input placeholder="Nome" name="fighters.0.name" />
-            <Input placeholder="Equipe" name="fighters.0.team" />
-          </div>
-          <div className="flex flex-col gap-4">
-            <Label htmlFor="fighter2" className="font-semibold">
-              Atleta 2
-            </Label>
-            <Input placeholder="Nome" name="fighters.1.name" />
-            <Input placeholder="Equipe" name="fighters.1.team" />
-          </div>
+    <form
+      method="post"
+      action={onSubmit as unknown as string}
+      className="space-y-8"
+    >
+      <DialogHeader>
+        <DialogTitle>Nova Luta</DialogTitle>
+        <DialogDescription>
+          Preencha os campos abaixo para criar uma nova luta.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between gap-4">
+          <Select name="belt_key">
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione a faixa" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Faixa</SelectLabel>
+                {belts.map((belt) => (
+                  <SelectItem key={belt.key} value={belt.key}>
+                    {belt.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Select name="category_key">
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione a categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Categoria</SelectLabel>
+                {categories.map((category) => (
+                  <SelectItem key={category.key} value={category.key}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
-        <DialogFooter>
-          <SubmitButton type="submit">Criar Luta</SubmitButton>
-        </DialogFooter>
-      </form>
-    </DialogContent>
+        <div className="flex justify-between gap-4">
+          <Select name="gender_key">
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione o gênero" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Gênero</SelectLabel>
+                {genders.map((gender) => (
+                  <SelectItem key={gender.key} value={gender.key}>
+                    {gender.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Select name="age_key">
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione a idade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Idade</SelectLabel>
+                {ages.map((age) => (
+                  <SelectItem key={age.key} value={age.key}>
+                    {age.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-4">
+          <Label htmlFor="fighter1" className="font-semibold">
+            Atleta 1
+          </Label>
+          <Input placeholder="Nome" name="fighters.0.name" />
+          <Input placeholder="Equipe" name="fighters.0.team" />
+        </div>
+        <div className="flex flex-col gap-4">
+          <Label htmlFor="fighter2" className="font-semibold">
+            Atleta 2
+          </Label>
+          <Input placeholder="Nome" name="fighters.1.name" />
+          <Input placeholder="Equipe" name="fighters.1.team" />
+        </div>
+      </div>
+      <DialogFooter>
+        <SubmitButton pendingText="Criando..." type="submit">
+          Criar Luta
+        </SubmitButton>
+      </DialogFooter>
+    </form>
   );
 }
