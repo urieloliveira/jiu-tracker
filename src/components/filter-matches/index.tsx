@@ -44,12 +44,12 @@ export default function FilterMatches() {
 
   return (
     <form
-      className="flex justify-between gap-4"
+      className="flex-1 flex justify-between items-center flex-wrap gap-4 flex-col md:flex-row"
       onSubmit={handleSubmit}
       ref={formRef}
     >
       <Select name="belt_key">
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="flex-1">
           <SelectValue placeholder="Faixa" />
         </SelectTrigger>
         <SelectContent>
@@ -65,7 +65,7 @@ export default function FilterMatches() {
         </SelectContent>
       </Select>
       <Select name="category_key">
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="flex-1">
           <SelectValue placeholder="Categoria" />
         </SelectTrigger>
         <SelectContent>
@@ -81,7 +81,7 @@ export default function FilterMatches() {
         </SelectContent>
       </Select>
       <Select name="gender_key">
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="flex-1">
           <SelectValue placeholder="Gênero" />
         </SelectTrigger>
         <SelectContent>
@@ -97,7 +97,7 @@ export default function FilterMatches() {
         </SelectContent>
       </Select>
       <Select name="age_key">
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="flex-1">
           <SelectValue placeholder="Idade" />
         </SelectTrigger>
         <SelectContent>
@@ -113,7 +113,7 @@ export default function FilterMatches() {
         </SelectContent>
       </Select>
       <Select name="status">
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="flex-1">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
@@ -128,12 +128,14 @@ export default function FilterMatches() {
           </SelectGroup>
         </SelectContent>
       </Select>
-      <Button type="reset" variant="ghost" onClick={handleReset}>
-        Limpar
-      </Button>
-      <Button type="submit" variant="secondary">
-        Filtrar
-      </Button>
+      <div className="flex-1 w-full flex gap-4">
+        <Button type="reset" variant="ghost" onClick={handleReset}>
+          Limpar
+        </Button>
+        <Button type="submit" variant="secondary">
+          Filtrar
+        </Button>
+      </div>
     </form>
   );
 }
