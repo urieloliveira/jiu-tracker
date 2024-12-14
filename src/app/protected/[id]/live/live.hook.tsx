@@ -1,10 +1,10 @@
 import { Fighter } from "@/components/fighter-card/types";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Match } from "@/components/create-match/schema";
 import { useTimers } from "@/components/timer/hook";
 import { Database } from "@/utils/supabase/types";
 import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
+import { Match } from "../match/match.hook";
 
 export const useMatch = ({ id }: { id: string }) => {
   const [fighters, setFighters] = useState<Fighter[]>([]);

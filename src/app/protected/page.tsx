@@ -8,12 +8,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Cast, MonitorPlay, MoreVertical, ScreenShare } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { signOutAction } from "../actions";
 import { createClient } from "@/utils/supabase/server";
 import { getLabel } from "@/components/create-match/data";
 import { Database } from "@/utils/supabase/types";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export type MatchData = Database["public"]["Tables"]["matches"]["Row"] & {

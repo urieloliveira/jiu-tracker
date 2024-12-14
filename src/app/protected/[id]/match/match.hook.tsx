@@ -1,10 +1,18 @@
 import { Fighter } from "@/components/fighter-card/types";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { Match } from "@/components/create-match/schema";
 import { useRouter } from "next/navigation";
 import { useTimers } from "@/components/timer/hook";
 import { Database } from "@/utils/supabase/types";
+
+export type Match = {
+  id: string;
+  status: "PENDING" | "STARTED" | "FINISHED";
+  belt_key: string;
+  category_key: string;
+  gender_key: string;
+  age_key: string;
+};
 
 export const useMatch = ({ id }: { id: string }) => {
   const router = useRouter();
