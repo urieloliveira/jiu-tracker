@@ -266,8 +266,8 @@ export const useMatch = ({ id }: { id: string }) => {
   const leaveMatch = async () => {
     await supabase.from("matches").update({ status: "PENDING" }).eq("id", id);
 
-    revalidatePath("/protected");
     router.push("/protected");
+    revalidatePath("/protected");
   };
 
   return {

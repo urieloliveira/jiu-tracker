@@ -21,6 +21,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import clsx from "clsx";
 import { DeleteMatch } from "@/components/delete-match";
+import FilterMatches from "@/components/filter-matches";
 
 export type MatchData = Database["public"]["Tables"]["matches"]["Row"] & {
   fighters: Array<
@@ -33,10 +34,16 @@ export type MatchData = Database["public"]["Tables"]["matches"]["Row"] & {
   >;
 };
 
-export default async function ProtectedPage() {
+export default async function ProtectedPage({
+  searchParams,
+}: {
+  searchParams: Promise<any>;
+}) {
   const supabase = await createClient();
+  const { belt_key, category_key, gender_key, age_key, status } =
+    (await searchParams) || {};
 
-  const { data, error } = await supabase.from("matches").select(
+  let query = supabase.from("matches").select(
     `
       *,
       match_fighters (
@@ -49,6 +56,14 @@ export default async function ProtectedPage() {
       )
     `
   );
+
+  if (belt_key) query = query.eq("belt_key", belt_key);
+  if (category_key) query = query.eq("category_key", category_key);
+  if (gender_key) query = query.eq("gender_key", gender_key);
+  if (age_key) query = query.eq("age_key", age_key);
+  if (status) query = query.eq("status", status);
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Erro ao buscar dados:", error);
@@ -93,6 +108,7 @@ export default async function ProtectedPage() {
         </div>
       </header>
       <div className="max-w-5xl w-full md:px-4 py-4">
+        <FilterMatches />
         {matches && matches.length > 0 ? (
           <div className="grid md:grid-cols-1 md:gap-4 md:mt-4 sm:grid-cols-1 gap-2">
             {matches.map((match) => (
@@ -139,7 +155,6 @@ export default async function ProtectedPage() {
                   </div>
                 </div>
 
-                {/* Menu Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="secondary" size="icon">
@@ -147,7 +162,7 @@ export default async function ProtectedPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {match.status === "PENDING" && (
+                    {match.status !== "FINISHED" && (
                       <Link
                         href={`/protected/${match.id}/match`}
                         target="_blank"
