@@ -37,7 +37,13 @@ export type MatchData = Database["public"]["Tables"]["matches"]["Row"] & {
 export default async function ProtectedPage({
   searchParams,
 }: {
-  searchParams: Promise<any>;
+  searchParams: Promise<{
+    belt_key: string;
+    category_key: string;
+    gender_key: string;
+    age_key: string;
+    status: string;
+  }>;
 }) {
   const supabase = await createClient();
   const { belt_key, category_key, gender_key, age_key, status } =

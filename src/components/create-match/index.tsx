@@ -1,5 +1,4 @@
 import {
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -20,7 +19,6 @@ import { ages, belts, categories, genders } from "./data";
 import { nanoid } from "nanoid";
 import { createClient } from "@/utils/supabase/server";
 import { SubmitButton } from "../submit-button";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export default function CreateMatch() {

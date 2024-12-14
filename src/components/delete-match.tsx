@@ -2,7 +2,6 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
-import { revalidatePath } from "next/cache";
 import { useRouter } from "next/navigation";
 
 export const DeleteMatch = ({

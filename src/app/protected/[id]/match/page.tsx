@@ -5,12 +5,11 @@ import FighterCard from "@/components/fighter-card";
 import MatchActions from "@/components/match-actions";
 import { Dialog } from "@/components/ui/dialog";
 import FinishMatchDialog from "@/components/finish-match-dialog";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { getLabel } from "@/components/create-match/data";
 
 export default function Match() {
   const { id } = useParams();
-  const router = useRouter();
   const {
     match,
     fighters,
@@ -37,6 +36,7 @@ export default function Match() {
           .map((fighter) => {
             return (
               <FighterCard
+                key={fighter.id}
                 mode="edit"
                 fighter={fighter}
                 actions={{

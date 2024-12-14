@@ -17,6 +17,7 @@ export default function Live() {
         .sort((a, b) => a.position - b.position)
         .map((fighter) => (
           <FighterCard
+            key={fighter.id}
             mode="view"
             fighter={fighter}
             scoreBgColor={
