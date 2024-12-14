@@ -21,11 +21,7 @@ import { nanoid } from "nanoid";
 import { createClient } from "@/utils/supabase/server";
 import { SubmitButton } from "../submit-button";
 
-export default function CreateMatch({
-  onCompleted,
-}: {
-  onCompleted: () => void;
-}) {
+export default function CreateMatch() {
   async function onSubmit(formData: FormData) {
     "use server";
     const supabase = await createClient();
@@ -110,7 +106,6 @@ export default function CreateMatch({
       if (matchFightersError)
         throw new Error("Erro ao inserir os lutadores na luta");
 
-      onCompleted();
       console.log("Tudo inserido com sucesso");
     } catch (err) {
       console.error(err);

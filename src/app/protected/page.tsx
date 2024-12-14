@@ -72,11 +72,7 @@ export default async function ProtectedPage() {
             <DialogTrigger asChild>
               <Button variant="default">Nova Luta</Button>
             </DialogTrigger>
-            <CreateMatch
-              onCompleted={() => {
-                // implement create match action
-              }}
-            />
+            <CreateMatch />
           </Dialog>
           <Button type="submit" variant="outline" onClick={signOutAction}>
             Sign out
