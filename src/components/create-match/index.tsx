@@ -65,9 +65,10 @@ export default function CreateMatch() {
       age_key: values.age_key,
     };
 
-    const matchFighters = fighters.map((fighter) => ({
+    const matchFighters = fighters.map((fighter, index) => ({
       match_id: match.id,
       fighter_id: fighter.id,
+      position: index + 1,
       advantages: 0,
       points: 0,
       penalties: 0,
