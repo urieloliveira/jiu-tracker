@@ -7,12 +7,13 @@ export const belts = [
 ];
 export const categories = [
   { key: "FEATHER", label: "Pena" },
-  { key: "LIGHT", label: "Leve" },
-  { key: "MIDDLE", label: "Médio" },
-  { key: "MEDIUM_HEAVY", label: "Meio-Pesado" },
   { key: "HEAVY", label: "Pesado" },
+  { key: "LIGHT", label: "Leve" },
+  { key: "MEDIUM_HEAVY", label: "Meio-Pesado" },
+  { key: "MIDDLE", label: "Médio" },
   { key: "SUPER_HEAVY", label: "Super-Pesado" },
   { key: "ULTRA_HEAVY", label: "Pesadíssimo" },
+  { key: "ABSOLUTE", label: "Absoluto" },
 ];
 export const genders = [
   { key: "MALE", label: "Masculino" },

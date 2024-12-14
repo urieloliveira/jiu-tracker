@@ -5,7 +5,6 @@ import { Match } from "@/components/create-match/schema";
 import { useRouter } from "next/navigation";
 import { useTimers } from "@/components/timer/hook";
 import { Database } from "@/utils/supabase/types";
-import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
 
 export const useMatch = ({ id }: { id: string }) => {
   const router = useRouter();
@@ -71,7 +70,7 @@ export const useMatch = ({ id }: { id: string }) => {
     };
 
     fetchData();
-  }, [id, reset, supabase]);
+  }, []);
 
   const updateScore = async (
     fighterId: string,
@@ -232,42 +231,6 @@ export const useMatch = ({ id }: { id: string }) => {
     router.push("/protected");
   };
 
-  const onUpdated = (
-    payload: RealtimePostgresUpdatePayload<{
-      id: string;
-      match_id: string;
-      fighter_id: string;
-      advantages: number;
-      points: number;
-      penalties: number;
-      winner_by: string | null;
-    }>
-  ) => {
-    if (payload.new.match_id !== id) return;
-    const matchFighterUpdated = payload.new;
-    const updatedFighterIndex = fighters.findIndex(
-      (fighter) => fighter.id === matchFighterUpdated.fighter_id
-    );
-    const updatedFighter: Fighter = {
-      id: matchFighterUpdated.fighter_id,
-      name: fighters[updatedFighterIndex].name,
-      team: fighters[updatedFighterIndex].team,
-      winnerBy: matchFighterUpdated.winner_by || undefined,
-      scores: {
-        advantages: matchFighterUpdated.advantages,
-        penalties: matchFighterUpdated.penalties,
-        points: matchFighterUpdated.points,
-      },
-    };
-    setFighters((prev) => {
-      return [
-        ...prev.slice(0, updatedFighterIndex),
-        updatedFighter,
-        ...prev.slice(updatedFighterIndex + 1),
-      ];
-    });
-  };
-
   return {
     match,
     fighters,
@@ -283,6 +246,5 @@ export const useMatch = ({ id }: { id: string }) => {
     finished,
     finishMatch,
     onComplete,
-    onUpdated,
   };
 };

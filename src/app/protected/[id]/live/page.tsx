@@ -1,33 +1,15 @@
 "use client";
 import { getLabel } from "@/components/create-match/data";
-import { useMatch } from "../match.hook";
+import { useMatch } from "./live.hook";
 import FighterCard from "@/components/fighter-card";
 import Timer from "@/components/timer";
 import { useParams } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect } from "react";
 
 export default function Live() {
-  const supabase = createClient();
   const { id } = useParams();
-  const { fighters, match, onUpdated } = useMatch({
+  const { fighters, match } = useMatch({
     id: id as string,
   });
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("match_fighters")
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "match_fighters" },
-        onUpdated
-      )
-      .subscribe();
-
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [supabase, onUpdated]);
 
   return (
     <div className="flex flex-col h-screen gap-2 bg-zinc-950">

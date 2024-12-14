@@ -1,5 +1,4 @@
-"use client";
-import { useRouter } from "next/navigation";
+"use server";
 import CreateMatch from "@/components/create-match";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,64 +8,59 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { MoreVertical } from "lucide-react";
+import { Cast, MonitorPlay, MoreVertical, ScreenShare } from "lucide-react";
 import { signOutAction } from "../actions";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
 import { getLabel } from "@/components/create-match/data";
-import { useEffect, useState } from "react";
-import { Fighter, Match, MatchFighter } from "@/components/create-match/schema";
 import { Database } from "@/utils/supabase/types";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
-export type MatchData = Match & {
-  fighters: Array<Fighter & MatchFighter>;
+export type MatchData = Database["public"]["Tables"]["matches"]["Row"] & {
+  fighters: Array<
+    Database["public"]["Tables"]["fighters"]["Row"] & {
+      advantages: number;
+      points: number;
+      penalties: number;
+    }
+  >;
 };
 
-export default function ProtectedPage() {
-  const router = useRouter();
-  const [matches, setMatchesData] = useState<MatchData[]>([]);
+export default async function ProtectedPage() {
+  const supabase = await createClient();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const supabase = createClient();
+  const { data, error } = await supabase.from("matches").select(`
+      *,
+      match_fighters (
+        advantages,
+        points,
+        penalties,
+        fighter_id,
+        fighters: fighter_id (*)
+      )
+    `);
 
-      const { data, error } = await supabase.from("matches").select(`
-          *,
-          match_fighters (
-            advantages,
-            points,
-            penalties,
-            fighter_id,
-            fighters: fighter_id (*)
-          )
-        `);
+  if (error) {
+    console.error("Erro ao buscar dados:", error);
+    return <p>Erro ao carregar os dados.</p>;
+  }
 
-      if (error) {
-        console.error("Erro ao buscar dados:", error);
-        return;
-      }
-
-      const formattedData: MatchData[] =
-        data?.map((match) => ({
-          ...match,
-          fighters: match.match_fighters.map(
-            (
-              mf: Database["public"]["Tables"]["match_fighters"]["Row"] & {
-                fighters: Database["public"]["Tables"]["fighters"]["Row"];
-              }
-            ) => ({
-              ...mf.fighters,
-              advantages: mf.advantages,
-              points: mf.points,
-              penalties: mf.penalties,
-            })
-          ),
-        })) || [];
-
-      setMatchesData(formattedData);
-    };
-
-    fetchData();
-  }, []);
+  const matches: MatchData[] =
+    data?.map((match) => ({
+      ...match,
+      fighters: match.match_fighters.map(
+        (
+          mf: Database["public"]["Tables"]["match_fighters"]["Row"] & {
+            fighters: Database["public"]["Tables"]["fighters"]["Row"];
+          }
+        ) => ({
+          ...mf.fighters,
+          advantages: mf.advantages,
+          points: mf.points,
+          penalties: mf.penalties,
+        })
+      ),
+    })) || [];
 
   return (
     <div className="flex flex-col items-center p-4 min-h-screen">
@@ -79,7 +73,11 @@ export default function ProtectedPage() {
             <DialogTrigger asChild>
               <Button variant="default">Nova Luta</Button>
             </DialogTrigger>
-            <CreateMatch />
+            <CreateMatch
+              onCompleted={() => {
+                // implement create match action
+              }}
+            />
           </Dialog>
           <Button type="submit" variant="outline" onClick={signOutAction}>
             Sign out
@@ -87,7 +85,7 @@ export default function ProtectedPage() {
         </div>
       </header>
       <div className="max-w-5xl w-full md:px-4 py-4">
-        {matches && matches?.length > 0 ? (
+        {matches && matches.length > 0 ? (
           <div className="grid md:grid-cols-1 md:gap-4 md:mt-4 sm:grid-cols-1 gap-2">
             {matches.map((match) => (
               <div
@@ -129,23 +127,16 @@ export default function ProtectedPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() =>
-                        router.push(`/protected/${match.id}/match`)
-                      }
-                    >
-                      <span>Iniciar</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <span>Editar</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        // implement delete match
-                      }}
-                    >
-                      <span>Excluir</span>
-                    </DropdownMenuItem>
+                    <Link href={`/protected/${match.id}/match`}>
+                      <DropdownMenuItem>
+                        <span>Iniciar</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href={`/protected/${match.id}/live`}>
+                      <DropdownMenuItem>
+                        <span>Live</span>
+                      </DropdownMenuItem>
+                    </Link>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

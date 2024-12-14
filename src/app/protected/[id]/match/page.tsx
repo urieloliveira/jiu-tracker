@@ -1,6 +1,6 @@
 "use client";
 import Timer from "@/components/timer";
-import { useMatch } from "../match.hook";
+import { useMatch } from "./match.hook";
 import FighterCard from "@/components/fighter-card";
 import MatchActions from "@/components/match-actions";
 import { Dialog } from "@/components/ui/dialog";
